@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+
+  # database
+  database:
+    image: postgres
+    container_name: dock_db
+    ports:
+      - ${DB_PORT}:${INTERNAL_PORT_DB}
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080      
+
+  # Api
+  api:
+    extends:
+      file: docker-compose.base.yml
+      service: nx-app-base
+    command: npm run api:dev:docker
+    ports:
+      - ${API_PORT}:${INTERNAL_API_PORT}
+      - ${API_PORT_DEBUG}:${API_PORT_DEBUG} # Server Debugging port
+
+  # Smart Medical
+  smart-medical:
+    extends:
+      file: docker-compose.base.yml
+      service: nx-app-base
+    command: npm run smart-medical:dev:docker -- --host=0.0.0.0 --port=${APP_PORT}
+    ports:
+      - ${APP_PORT}:${APP_PORT} 
+
+volumes:
+  mono-node-modules: null
